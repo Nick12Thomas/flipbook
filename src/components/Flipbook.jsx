@@ -1,52 +1,53 @@
-import React from 'react'
+import React, { useState } from 'react';
 import HTMLFlipBook from 'react-pageflip';
-import { useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import pdf from './ByteBeatJan2024.pdf';
+import pdf from './sample.pdf';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
-const Pages = React.forwardRef((props, ref) => {
-    return (
-        <div className="demoPage" ref={ref} >
-            <p>{props.children}</p>
-            <p>Page number: {props.number}</p>
-        </div>
-    );
-});
+const Pages = React.forwardRef(({ number, children }, ref) => (
+    <div className="demoPage bg-white" ref={ref}>
+        {children}
+        <p className="text-center">Page number: {number}</p>
+    </div>
+));
 
 Pages.displayName = 'Pages';
 
 function Flipbook() {
-
-    const [numPages, setNumPages] = useState();
+    const [numPages, setNumPages] = useState(null);
 
     function onDocumentLoadSuccess({ numPages }) {
         setNumPages(numPages);
     }
+
     return (
-        <>
+        <div className='h-screen w-screen flex flex-col gap-5 justify-center items-center bg-gray-900 overflow-hidden'>
+            <h1 className='text-3xl text-white text-center font-bold'>FlipBook</h1>
 
-            <div className='h-screen w-screen flex flex-col gap-5 justify-center items-center bg-gray-900 overflow-hidden'>
-                <h1 className='text-3xl text-white text-center font-bold'>FlipBook-</h1>
+            {/* Load the PDF once to get the number of pages */}
+            <Document file={pdf} onLoadSuccess={onDocumentLoadSuccess} className="hidden">
+                <Page pageNumber={1} />
+            </Document>
+
+            {numPages && (
                 <HTMLFlipBook width={400} height={570}>
-                    {
-                        [...Array(numPages).keys()].map((pNum) => (
-                            <Pages key={pNum} number={pNum + 1}>
-                                <Document file={pdf} onLoadSuccess={onDocumentLoadSuccess}>
-                                    <Page pageNumber={pNum} width={400} renderAnnotationLayer={false} renderTextLayer={false} />
-                                </Document>
-                                <p>
-                                    Page {pNum} of {numPages}
-                                </p>
-                            </Pages>
-                        ))
-                    }
+                    {Array.from({ length: numPages }, (_, index) => (
+                        <Pages key={index} number={index + 1}>
+                            <Document file={pdf}>
+                                <Page
+                                    pageNumber={index + 1}
+                                    width={400}
+                                    renderAnnotationLayer={false}
+                                    renderTextLayer={false}
+                                />
+                            </Document>
+                        </Pages>
+                    ))}
                 </HTMLFlipBook>
-            </div>
-        </>
-
+            )}
+        </div>
     );
 }
 
-export default Flipbook
+export default Flipbook;
