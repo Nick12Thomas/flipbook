@@ -1,17 +1,12 @@
-import Flipbook from "./components/Flipbook"
-
+import React from 'react';
+import Flipbook from './components/Flipbook';
 
 function App() {
-
   return (
-    <>
     <div>
-
-      <Flipbook/>
-
+      <Flipbook />
     </div>
-    </>
-  )
+  );
 }
 
-export default App
+export default App;
